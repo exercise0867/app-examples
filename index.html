@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>앱 기획 예시 5종</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root { --bg: #ECEFF3; --panel: #FFFFFF; --fg: #141B24; --muted: #5A6675; --line: #D5DBE3; --hl: #2B59C3;
+  --sans: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace; }
+@media (prefers-color-scheme: dark) { :root { --bg: #0F141A; --panel: #171E26; --fg: #E5EAF0; --muted: #93A0AE; --line: #2A3540; --hl: #7FA3F0; color-scheme: dark; } }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); line-height: 1.6; }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 48px 64px; }
+h1 { font-size: 30px; margin: 0; letter-spacing: -.01em; text-wrap: balance; }
+.lead { color: var(--muted); max-width: 64ch; margin: 8px 0 32px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+a.app { display: flex; flex-direction: column; gap: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 20px; color: inherit; text-decoration: none; transition: border-color .15s, transform .15s; }
+a.app:hover, a.app:focus-visible { border-color: var(--hl); transform: translateY(-2px); outline: none; }
+.sw { width: 28px; height: 6px; border-radius: 3px; }
+.app b { font-size: 19px; }
+.gnb { font-family: var(--mono); font-size: 12px; color: var(--hl); }
+.app span { color: var(--muted); font-size: 14px; }
+.go { margin-top: auto; padding-top: 8px; font-size: 13px; font-weight: 700; color: var(--hl); }
+h2 { font-size: 16px; margin: 40px 0 12px; }
+.cc { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.cc div { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.cc small { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+footer { margin-top: 40px; font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { a.app { transition: none; } a.app:hover { transform: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>앱 기획 예시 5종</h1>
+  <p class="lead">GNB 구조가 서로 다른 다섯 가지 앱입니다. PC에서는 웹 레이아웃, 휴대폰에서는 앱 레이아웃으로 바뀌고, 화면의 "디자인" 버튼으로 6가지 디자인 컨셉을 바꿔 볼 수 있습니다. 제품명, 사람, 금액은 모두 예시입니다.</p>
+  <div class="grid">
+    <a class="app" href="commerce.html"><i class="sw" style="background:#FF4F2E"></i><b>마켓온</b><em class="gnb">하단 탭 바</em><span>커머스 · 검색, 옵션, 장바구니, 주문까지</span><span class="go">열기 →</span></a>
+    <a class="app" href="smarthome.html"><i class="sw" style="background:#F2B544"></i><b>하우스</b><em class="gnb">사이드 드로어</em><span>스마트홈 · 기기 제어, 장면, 자동화, 에너지</span><span class="go">열기 →</span></a>
+    <a class="app" href="community.html"><i class="sw" style="background:#2C6B4E"></i><b>동네생활</b><em class="gnb">상단 탭 + 중앙 작성 버튼</em><span>커뮤니티 · 피드, 댓글, 글쓰기, 알림</span><span class="go">열기 →</span></a>
+    <a class="app" href="finance.html"><i class="sw" style="background:#3D46D6"></i><b>머니로그</b><em class="gnb">플로팅 필 내비</em><span>금융 · 송금, 내역, 예산, 카드 설정</span><span class="go">열기 →</span></a>
+    <a class="app" href="superapp.html"><i class="sw" style="background:#0A5CFF"></i><b>올인원</b><em class="gnb">전체메뉴 + 바텀시트</em><span>생활 슈퍼앱 · 퀵메뉴 편집, 공과금, 혜택</span><span class="go">열기 →</span></a>
+  </div>
+  <h2>디자인 컨셉 6종</h2>
+  <div class="cc">
+    <div><small>현재</small>기본</div>
+    <div><small>2025 트렌드</small>리퀴드 글래스</div>
+    <div><small>2023 트렌드</small>네오 브루탈리즘</div>
+    <div><small>2024 트렌드</small>벤토 다크 미니멀</div>
+    <div><small>2011 레트로</small>스큐어모피즘</div>
+    <div><small>Y2K 레트로</small>윈도우 98</div>
+  </div>
+  <footer>기획 참고용 예시 페이지입니다. 실제로 판매, 결제, 송금하지 않습니다.</footer>
+</div>
+</body>
+</html>

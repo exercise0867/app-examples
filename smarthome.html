@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>하우스</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;500;700;800&family=Black+Han+Sans&family=Do+Hyeon&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: 모바일=앱 바+드로어 / 태블릿=아이콘 레일 / 데스크톱=고정 사이드바+대시보드+오른쪽 상세 패널. 단일 다크 테마 */
+:root {
+  --bg: #14161D; --side: #1A1D27; --card: #1E212C; --card2: #282C3A; --line: #2C3040;
+  --fg: #ECEDF3; --mut: #8C92A8; --c: #F2B544; --on-c: #14161D; --c-dim: rgba(242,181,68,.14); --cool: #6FA8FF; --good: #5BD39A;
+  --font: "Gothic A1", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+button { font: inherit; color: inherit; }
+button:focus-visible { outline: 2px solid var(--c); outline-offset: 2px; }
+.num { font-variant-numeric: tabular-nums; }
+.mut { color: var(--mut); font-size: 13px; }
+
+.app { display: grid; grid-template-columns: 1fr; min-height: 100%; }
+.side { display: none; }
+.main { min-width: 0; display: flex; flex-direction: column; }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; align-items: center; gap: 8px; padding: 10px 12px 10px 8px; border-bottom: 1px solid transparent; }
+.bar .t { flex: 1; font-size: 18px; font-weight: 800; min-width: 0; }
+.bar .t small { display: block; font-size: 12px; font-weight: 400; color: var(--mut); }
+.ib { background: none; border: 0; padding: 8px; cursor: pointer; display: grid; place-items: center; position: relative; border-radius: 10px; }
+.ib:hover { background: rgba(255,255,255,.05); }
+.badge { position: absolute; top: 2px; right: 2px; min-width: 16px; height: 16px; border-radius: 8px; background: var(--c); color: var(--on-c); font-size: 10px; font-weight: 800; line-height: 16px; text-align: center; padding: 0 4px; }
+.content { padding: 4px 16px 32px; display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 1280px; }
+.burger { display: grid; }
+
+/* sidebar / drawer content */
+.home-sw { margin: 0 14px 16px; padding: 14px; background: var(--card2); border-radius: 14px; border: 0; text-align: left; cursor: pointer; width: calc(100% - 28px); }
+.home-sw b { font-size: 16px; display: block; } .home-sw span { font-size: 12px; color: var(--mut); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 22px 18px; font-weight: 800; font-size: 20px; letter-spacing: -.02em; }
+.brand i { width: 30px; height: 30px; border-radius: 10px; background: var(--c); color: var(--on-c); display: grid; place-items: center; font-style: normal; }
+.dn { background: none; border: 0; display: flex; gap: 14px; align-items: center; padding: 11px 22px; cursor: pointer; font-size: 15px; color: var(--mut); text-align: left; width: 100%; border-radius: 0; }
+.dn:hover { color: var(--fg); }
+.dn.on { color: var(--fg); font-weight: 700; background: var(--c-dim); box-shadow: inset 3px 0 0 var(--c); }
+.dn.on svg { color: var(--c); }
+.dsep { height: 1px; background: var(--card2); margin: 8px 22px; }
+.who { margin-top: auto; padding: 14px 22px 0; font-size: 12px; color: var(--mut); display: flex; gap: 10px; align-items: center; }
+.who i { width: 32px; height: 32px; border-radius: 50%; background: var(--c); color: var(--on-c); display: grid; place-items: center; font-style: normal; font-weight: 800; flex: none; }
+.who b { color: var(--fg); display: block; font-size: 13px; }
+
+/* drawer (mobile) */
+.drawer { position: fixed; inset: 0; z-index: 30; display: flex; }
+.drawer .pnl { width: min(82%, 320px); background: var(--side); height: 100%; padding: calc(env(safe-area-inset-top, 0px) + 24px) 0 calc(env(safe-area-inset-bottom, 0px) + 20px); display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,.4); animation: slide .2s ease-out; overflow-y: auto; }
+.drawer .shade { flex: 1; background: rgba(0,0,0,.55); border: 0; cursor: pointer; }
+@keyframes slide { from { transform: translateX(-100%); } to { transform: none; } }
+
+/* dashboard pieces */
+.env { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--card2); border-radius: 18px; overflow: hidden; }
+.env div { background: var(--card); padding: 12px 14px; font-size: 12px; color: var(--mut); min-width: 0; }
+.env b { display: block; color: var(--fg); font-size: 22px; font-weight: 800; }
+.env .g { color: var(--good); }
+.env .x { display: none; }
+.rooms { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.rooms::-webkit-scrollbar { display: none; }
+.rooms button { flex: none; border: 1px solid var(--card2); background: none; color: var(--mut); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: 13px; }
+.rooms button.on { background: var(--fg); color: var(--bg); border-color: var(--fg); font-weight: 700; }
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tile { background: var(--card); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; min-height: 122px; position: relative; min-width: 0; }
+.tile.on { background: var(--card2); box-shadow: inset 0 0 0 1px rgba(242,181,68,.35); }
+.tile.sel { box-shadow: inset 0 0 0 2px var(--c); }
+.tile .op { background: none; border: 0; text-align: left; padding: 0; cursor: pointer; display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.tile .op b { font-size: 14px; } .tile .op span { font-size: 12px; color: var(--mut); }
+.tile.on .op span { color: var(--c); }
+.tile .ico { width: 36px; height: 36px; border-radius: 12px; background: rgba(255,255,255,.06); display: grid; place-items: center; color: var(--mut); }
+.tile.on .ico { background: var(--c-dim); color: var(--c); }
+.tile .sw { position: absolute; right: 12px; top: 14px; }
+.sw { width: 44px; height: 26px; border-radius: 13px; border: 0; position: relative; cursor: pointer; flex: none; background: #3A3F52; }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .18s; box-shadow: 0 1px 2px rgba(0,0,0,.3); }
+.sw.on { background: var(--c); } .sw.on::after { left: 21px; }
+.add { border: 1px dashed var(--line); background: none; border-radius: 16px; padding: 14px; color: var(--mut); cursor: pointer; }
+.add:hover { color: var(--fg); border-color: var(--mut); }
+.crd { background: var(--card); border-radius: 18px; padding: 16px; min-width: 0; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sec-h h2 { margin: 0; font-size: 16px; }
+
+/* detail */
+.dial { width: 190px; height: 190px; border-radius: 50%; margin: 10px auto; display: grid; place-items: center; text-align: center; background: radial-gradient(circle at 50% 40%, #2C3142, #1B1E28 70%); box-shadow: 0 0 0 8px rgba(242,181,68,.12), 0 0 40px rgba(242,181,68,.15); }
+.dial.off { box-shadow: 0 0 0 8px rgba(255,255,255,.04); }
+.dial b { font-size: 46px; font-weight: 800; line-height: 1; } .dial small { display: block; color: var(--mut); font-size: 12px; }
+.pm { display: flex; justify-content: center; gap: 28px; }
+.pm button { width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--card2); font-size: 24px; cursor: pointer; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.seg button { border: 0; background: var(--card2); color: var(--mut); border-radius: 12px; padding: 10px 0; cursor: pointer; font-size: 13px; }
+.seg button.on { background: var(--c); color: var(--on-c); font-weight: 700; }
+.pw { width: 100%; border: 0; border-radius: 14px; padding: 14px; font-weight: 700; cursor: pointer; background: var(--card2); }
+.pw.on { background: var(--c); color: var(--on-c); }
+.detail { display: flex; flex-direction: column; gap: 14px; }
+.dhead { display: flex; align-items: center; gap: 6px; }
+.dhead .t { flex: 1; font-size: 17px; font-weight: 800; }
+.dhead .t small { display: block; font-size: 12px; color: var(--mut); font-weight: 400; }
+
+/* scenes / automations */
+.scenes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.scene { background: var(--sc, var(--card2)); border: 0; border-radius: 18px; padding: 16px 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-height: 124px; color: var(--fg); }
+.scene b { font-size: 16px; } .scene span { font-size: 12px; opacity: .75; line-height: 1.4; }
+.scene:hover { filter: brightness(1.12); }
+.rules { display: grid; grid-template-columns: 1fr; gap: 10px; }
+.rule { background: var(--card); border-radius: 16px; padding: 14px; display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: start; }
+.rule.off { opacity: .5; }
+.ift { font-size: 13px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.ift span { display: flex; gap: 8px; align-items: baseline; }
+.ift i { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .08em; padding: 2px 6px; border-radius: 4px; background: rgba(111,168,255,.15); color: var(--cool); flex: none; }
+.ift i.th { background: var(--c-dim); color: var(--c); }
+
+/* energy */
+.egrid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.ech { display: flex; align-items: flex-end; gap: 8px; height: 150px; padding-top: 18px; }
+.ech div { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; font-size: 11px; color: var(--mut); }
+.ech i { width: 100%; max-width: 56px; border-radius: 6px 6px 2px 2px; background: #3A4054; display: block; }
+.ech .now i { background: repeating-linear-gradient(45deg, var(--c), var(--c) 4px, #C9932F 4px, #C9932F 8px); }
+.ech em { font-style: normal; color: var(--fg); font-size: 11px; }
+.brk { display: flex; flex-direction: column; gap: 12px; }
+.bar2 { height: 6px; background: var(--card2); border-radius: 3px; overflow: hidden; margin-top: 4px; } .bar2 i { display: block; height: 100%; background: var(--c); }
+
+/* members / settings */
+.mem { display: flex; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--card2); }
+.mem:first-child { border-top: 0; padding-top: 0; }
+.mem .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #14161D; flex: none; }
+.role { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: var(--card2); color: var(--mut); margin-left: auto; white-space: nowrap; }
+.cta { border: 0; background: var(--c); color: var(--on-c); border-radius: 14px; padding: 13px 18px; font-weight: 800; cursor: pointer; }
+.two { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; }
+.setrow { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--card2); }
+.setrow:first-child { border-top: 0; padding-top: 0; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); z-index: 50; background: #F4F4F7; color: #14161D; font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 999px; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.4); }
+
+/* ---- tablet: icon rail ---- */
+@media (min-width: 768px) {
+  .app { grid-template-columns: 76px minmax(0, 1fr); }
+  .side { display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; background: var(--side); padding: 20px 0; border-right: 1px solid var(--line); overflow-y: auto; }
+  .side .brand { padding: 0 0 18px; justify-content: center; } .side .brand span { display: none; }
+  .side .home-sw, .side .who b, .side .who span, .side .dn span { display: none; }
+  .side .dn { justify-content: center; padding: 12px 0; }
+  .side .who { justify-content: center; padding: 14px 0 0; }
+  .burger { display: none; }
+  .bar { padding: 18px 24px 14px; }
+  .content { padding: 4px 24px 40px; }
+  .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .env { grid-template-columns: repeat(4, 1fr); } .env .x { display: block; }
+  .scenes { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail-page { max-width: 520px; }
+}
+/* ---- desktop: full sidebar + side panel ---- */
+@media (min-width: 1024px) {
+  .app { grid-template-columns: 248px minmax(0, 1fr); }
+  .side .brand { padding: 0 22px 18px; justify-content: flex-start; } .side .brand span { display: inline; }
+  .side .home-sw { display: block; } .side .who b, .side .who span { display: block; } .side .dn span { display: inline; }
+  .side .dn { justify-content: flex-start; padding: 11px 22px; }
+  .side .who { justify-content: flex-start; padding: 14px 22px 0; }
+  .bar { padding: 22px 32px 16px; border-bottom-color: var(--line); }
+  .bar .t { font-size: 22px; }
+  .content { padding: 24px 32px 48px; gap: 20px; }
+  .work { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; align-items: start; }
+  .work.has-panel { grid-template-columns: minmax(0, 1fr) 360px; }
+  .panel { position: sticky; top: 96px; background: var(--side); border: 1px solid var(--line); border-radius: 22px; padding: 18px; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .has-panel .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .env b { font-size: 26px; } .env div { padding: 16px 18px; }
+  .egrid { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+  .ech { height: 240px; }
+  .rules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .two { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); }
+}
+@media (min-width: 1400px) { .rules { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (prefers-reduced-motion: reduce) { *, *::after { transition: none !important; animation: none !important; } }
+
+/* ===================== 디자인 스위처 (모든 컨셉 공통, 중립 스타일) ===================== */
+.w98c, .w98task { display: none; }
+.dzbtn { font: 600 12px/1 -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; letter-spacing: 0; text-transform: none; background: #16181D; color: #FFFFFF; border: 1px solid rgba(255,255,255,.4); border-radius: 999px; padding: 8px 12px; cursor: pointer; display: inline-flex; gap: 6px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.28); text-shadow: none; flex: none; white-space: nowrap; }
+.dzbtn:hover { background: #2A2E37; }
+.dzbtn:focus-visible { outline: 2px solid #4C8DFF; outline-offset: 2px; }
+.dz-float { display: none; position: fixed; left: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); z-index: 60; }
+.dzp { position: fixed; z-index: 61; top: calc(env(safe-area-inset-top, 0px) + 60px); right: 12px; width: min(330px, calc(100vw - 24px)); max-height: calc(100vh - 90px); overflow-y: auto; background: #FFFFFF; color: #15181E; border: 1px solid #D3D7DE; border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,.35); padding: 8px; font: 13px/1.45 -apple-system, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; text-shadow: none; letter-spacing: 0; text-transform: none; }
+.dzh { font-weight: 700; font-size: 13px; padding: 8px 10px 6px; display: flex; justify-content: space-between; color: #15181E; }
+.dzh span { color: #6B7280; font-weight: 400; }
+.dzi { display: flex; flex-direction: column; gap: 2px; width: 100%; text-align: left; background: none; border: 0; border-radius: 10px; padding: 9px 10px; cursor: pointer; color: #15181E; font: inherit; }
+.dzi:hover { background: #F1F3F6; }
+.dzi.on { background: #EAF1FF; box-shadow: inset 0 0 0 1.5px #3B6FE0; }
+.dzi:focus-visible { outline: 2px solid #3B6FE0; outline-offset: -2px; }
+.dzt { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.dzt b { font-size: 14px; }
+.dzt em { font-style: normal; font-size: 11px; color: #4B5563; background: #EEF0F3; border-radius: 6px; padding: 1px 6px; }
+.dzt i { font-style: normal; font-size: 11px; font-weight: 700; color: #2152C4; margin-left: auto; }
+.dzd { font-size: 12px; color: #4B5563; }
+@media (min-width: 768px) {
+  .dz-inline { display: none; }
+  .dz-float { display: inline-flex; }
+  .side { padding-bottom: 72px; }
+  .dzp { top: auto; right: auto; left: 14px; bottom: calc(env(safe-area-inset-bottom, 0px) + 58px); }
+}
+@media (min-width: 768px) and (max-width: 1023px) { .dz-float { left: 8px; padding: 8px 9px; font-size: 11px; } .dz-float svg { display: none; } }
+
+/* ===================== 2. 리퀴드 글래스 (2025) ===================== */
+html[data-concept="glass"] { --bg: #EEF0FA; --side: rgba(255,255,255,.8); --card: rgba(255,255,255,.8); --card2: rgba(255,255,255,.92); --gl: rgba(255,255,255,.82); --line: rgba(255,255,255,.75); --fg: #151A2D; --mut: #485070; --c: #5048E5; --on-c: #FFFFFF; --c-dim: rgba(80,72,229,.12); --cool: #0B6FA8; --good: #087A52; --font: "Noto Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif; color-scheme: light; }
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  html[data-concept="glass"] { --side: rgba(255,255,255,.4); --card: rgba(255,255,255,.44); --card2: rgba(255,255,255,.66); --gl: rgba(255,255,255,.46); }
+  [data-concept="glass"] :is(.crd, .tile, .rule, .panel, .home-sw, .env > div, .bar, .side, .drawer .pnl, .scene, .pm button, .dial, .seg, .rooms button, .add, .pw) { -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); }
+}
+html[data-concept="glass"] body { background: radial-gradient(55% 45% at 8% 6%, #FFB7DD 0%, transparent 62%), radial-gradient(45% 45% at 92% 4%, #9AD6FF 0%, transparent 62%), radial-gradient(55% 55% at 85% 92%, #C3B1FF 0%, transparent 62%), radial-gradient(50% 50% at 4% 96%, #A6F1D6 0%, transparent 62%), radial-gradient(40% 40% at 50% 50%, #FFE6B8 0%, transparent 70%), #EEF0FA; background-attachment: fixed; }
+[data-concept="glass"] :is(.crd, .tile, .rule, .panel, .env > div) { background: var(--card); border: 1px solid rgba(255,255,255,.75); border-radius: 28px; box-shadow: inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1px 0 rgba(255,255,255,.3), 0 10px 30px -8px rgba(50,50,110,.18); }
+[data-concept="glass"] .env { background: none; gap: 10px; overflow: visible; border-radius: 0; }
+[data-concept="glass"] .env b { font-weight: 700; }
+[data-concept="glass"] .tile.on { background: var(--card2); box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1.5px rgba(80,72,229,.35), 0 12px 30px -10px rgba(80,72,229,.35); }
+[data-concept="glass"] .tile.sel { box-shadow: inset 0 0 0 2px var(--c), 0 12px 30px -10px rgba(80,72,229,.35); }
+[data-concept="glass"] .tile .ico { border-radius: 999px; background: rgba(255,255,255,.65); }
+[data-concept="glass"] .tile.on .ico { background: var(--c); color: #fff; }
+[data-concept="glass"] .tile.on .op span { color: #3D35C9; }
+[data-concept="glass"] .sw { background: rgba(20,24,45,.2); box-shadow: inset 0 1px 2px rgba(0,0,0,.15); }
+[data-concept="glass"] .sw.on { background: linear-gradient(135deg, #6C63FF, #3FA9F5); }
+[data-concept="glass"] .bar { margin: calc(env(safe-area-inset-top, 0px) + 10px) 10px 4px; top: calc(env(safe-area-inset-top, 0px) + 10px); border-radius: 999px; background: var(--gl); border: 1px solid rgba(255,255,255,.8); box-shadow: inset 0 1px 0 #fff, 0 10px 30px -10px rgba(50,50,110,.25); padding: 6px 8px 6px 6px; }
+[data-concept="glass"] .ib { border-radius: 999px; }
+[data-concept="glass"] .ib:hover { background: rgba(255,255,255,.55); }
+[data-concept="glass"] .rooms button { border: 1px solid rgba(255,255,255,.8); background: rgba(255,255,255,.45); color: var(--fg); }
+[data-concept="glass"] .rooms button.on { background: #151A2D; color: #fff; border-color: #151A2D; }
+[data-concept="glass"] :is(.seg button, .pw, .cta, .pm button, .home-sw) { border-radius: 999px; }
+[data-concept="glass"] .seg { background: rgba(255,255,255,.35); padding: 4px; border-radius: 999px; border: 1px solid rgba(255,255,255,.75); gap: 4px; }
+[data-concept="glass"] .seg button { background: transparent; color: var(--mut); }
+[data-concept="glass"] .seg button.on { background: #fff; color: var(--fg); box-shadow: 0 4px 12px rgba(50,50,110,.18); }
+[data-concept="glass"] .pw { background: rgba(255,255,255,.6); border: 1px solid rgba(255,255,255,.85); }
+[data-concept="glass"] :is(.pw.on, .cta) { background: linear-gradient(135deg, #6C63FF, #3FA9F5); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 10px 24px -8px rgba(80,72,229,.6); }
+[data-concept="glass"] .pm button { background: rgba(255,255,255,.55); border: 1px solid rgba(255,255,255,.85); box-shadow: inset 0 1px 0 #fff, 0 6px 16px -6px rgba(50,50,110,.3); }
+[data-concept="glass"] .dial { background: radial-gradient(circle at 50% 28%, rgba(255,255,255,.95), rgba(255,255,255,.35) 70%); border: 1px solid rgba(255,255,255,.9); box-shadow: inset 0 2px 0 #fff, 0 0 0 12px rgba(255,255,255,.3), 0 24px 60px -12px rgba(80,72,229,.45); }
+[data-concept="glass"] .dial.off { box-shadow: inset 0 2px 0 #fff, 0 0 0 12px rgba(255,255,255,.2); }
+[data-concept="glass"] .add { border: 1.5px dashed rgba(80,72,229,.4); background: rgba(255,255,255,.3); border-radius: 24px; color: var(--mut); }
+[data-concept="glass"] .scene { color: var(--fg); background: linear-gradient(160deg, rgba(255,255,255,.75), rgba(255,255,255,.3)); border: 1px solid rgba(255,255,255,.8); border-radius: 28px; box-shadow: inset 0 1px 0 #fff, 0 10px 30px -10px rgba(50,50,110,.25); }
+[data-concept="glass"] .scene span { opacity: 1; color: var(--mut); }
+[data-concept="glass"] .scene:nth-child(1) svg { color: #5048E5; } [data-concept="glass"] .scene:nth-child(2) svg { color: #D9661F; }
+[data-concept="glass"] .scene:nth-child(3) svg { color: #1F6FD9; } [data-concept="glass"] .scene:nth-child(4) svg { color: #C42E7E; }
+[data-concept="glass"] .ift i { background: rgba(11,111,168,.12); }
+[data-concept="glass"] .ech i { background: rgba(21,26,45,.14); border-radius: 999px; }
+[data-concept="glass"] .ech .now i { background: linear-gradient(#6C63FF, #3FA9F5); }
+[data-concept="glass"] .bar2 { background: rgba(21,26,45,.1); }
+[data-concept="glass"] .bar2 i { background: linear-gradient(90deg, #6C63FF, #3FA9F5); border-radius: 3px; }
+[data-concept="glass"] .role { background: rgba(255,255,255,.65); }
+[data-concept="glass"] :is(.mem, .setrow) { border-top-color: rgba(21,26,45,.08); }
+[data-concept="glass"] .dsep { background: rgba(21,26,45,.1); }
+[data-concept="glass"] .home-sw { background: rgba(255,255,255,.5); border: 1px solid rgba(255,255,255,.8); border-radius: 22px; }
+[data-concept="glass"] .brand i { background: linear-gradient(135deg, #6C63FF, #3FA9F5); color: #fff; border-radius: 999px; }
+[data-concept="glass"] .who i { background: linear-gradient(135deg, #FF8CC6, #FFB86B); color: #151A2D; }
+[data-concept="glass"] .dn { border-radius: 999px; margin: 2px 10px; width: calc(100% - 20px); padding: 10px 14px; }
+[data-concept="glass"] .dn.on { background: rgba(255,255,255,.78); box-shadow: inset 0 1px 0 #fff, 0 6px 16px -8px rgba(50,50,110,.35); }
+[data-concept="glass"] .drawer .pnl { background: var(--gl); margin: 10px; height: calc(100% - 20px); border-radius: 30px; border: 1px solid rgba(255,255,255,.8); }
+[data-concept="glass"] .drawer .shade { background: rgba(30,30,60,.25); }
+[data-concept="glass"] .toast { background: rgba(21,26,45,.88); color: #fff; }
+[data-concept="glass"] .badge { background: #E5397A; color: #fff; }
+@media (min-width: 768px) {
+  [data-concept="glass"] .side { margin: 12px 0 12px 12px; height: calc(100vh - 24px); top: 12px; border-radius: 32px; border: 1px solid rgba(255,255,255,.8); background: var(--gl); box-shadow: inset 0 1px 0 #fff, 0 20px 50px -20px rgba(50,50,110,.35); }
+  [data-concept="glass"] .side .dn { margin: 2px 8px; width: calc(100% - 16px); padding: 12px 0; }
+  [data-concept="glass"] .bar { margin: 12px 24px 4px; top: 12px; padding: 10px 14px 10px 22px; border-bottom-color: rgba(255,255,255,.8); }
+}
+@media (min-width: 1024px) {
+  [data-concept="glass"] .side .dn { padding: 10px 16px; }
+  [data-concept="glass"] .bar { padding: 12px 16px 12px 28px; }
+  [data-concept="glass"] .panel { top: 100px; border-radius: 32px; }
+}
+
+/* ===================== 3. 네오 브루탈리즘 (2023) ===================== */
+html[data-concept="brutal"] { --bg: #F6F0FF; --side: #FFFFFF; --card: #FFFFFF; --card2: #FFE45C; --line: #111111; --fg: #111111; --mut: #333333; --c: #B6F24A; --on-c: #111111; --c-dim: #E7FFC4; --cool: #2457FF; --good: #0E7A3B; --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif; --disp: "Black Han Sans", "Do Hyeon", "Apple SD Gothic Neo", sans-serif; color-scheme: light; }
+html[data-concept="brutal"] body { background-color: #F6F0FF; background-image: radial-gradient(rgba(17,17,17,.16) 1px, transparent 1.3px); background-size: 22px 22px; font-weight: 500; }
+[data-concept="brutal"] :is(.crd, .tile, .rule, .panel, .env > div, .scene, .add, .pw, .cta, .seg button, .rooms button, .pm button, .home-sw, .dial) { border: 2.5px solid #111; box-shadow: 4px 4px 0 #111; border-radius: 8px; }
+[data-concept="brutal"] .env { background: none; gap: 10px; overflow: visible; border-radius: 0; }
+[data-concept="brutal"] .env > div { color: #111; font-weight: 600; }
+[data-concept="brutal"] .env > div:nth-child(1) { background: #FFE45C; } [data-concept="brutal"] .env > div:nth-child(2) { background: #8FD3FF; }
+[data-concept="brutal"] .env > div:nth-child(3) { background: #B6F24A; } [data-concept="brutal"] .env > div:nth-child(4) { background: #FF9ED2; }
+[data-concept="brutal"] .env b, [data-concept="brutal"] .env .g { color: #111; }
+[data-concept="brutal"] :is(.bar .t, .brand, .sec-h h2, .dhead .t, .env b, .dial b, .scene b, .crd > b) { font-family: var(--disp); font-weight: 400; letter-spacing: 0; }
+[data-concept="brutal"] :is(.bar .t small, .dhead .t small) { font-family: var(--font); font-weight: 600; color: #333; }
+[data-concept="brutal"] .bar { background: #F6F0FF; }
+[data-concept="brutal"] .tile { background: #fff; }
+[data-concept="brutal"] .tile.on:nth-child(4n+1) { background: #FFE45C; } [data-concept="brutal"] .tile.on:nth-child(4n+2) { background: #FF9ED2; }
+[data-concept="brutal"] .tile.on:nth-child(4n+3) { background: #8FD3FF; } [data-concept="brutal"] .tile.on:nth-child(4n+4) { background: #B6F24A; }
+[data-concept="brutal"] .tile .op span { color: #333; }
+[data-concept="brutal"] .tile.on .op span { color: #111; font-weight: 700; }
+[data-concept="brutal"] .tile.sel { outline: 3px solid #2457FF; outline-offset: 3px; }
+[data-concept="brutal"] .tile .ico { background: #fff; border: 2px solid #111; border-radius: 6px; color: #111; }
+[data-concept="brutal"] .tile.on .ico { background: #111; color: #fff; }
+[data-concept="brutal"] .sw { border: 2.5px solid #111; background: #fff; border-radius: 6px; height: 28px; width: 50px; }
+[data-concept="brutal"] .sw::after { top: 2px; left: 2px; width: 19px; height: 19px; border-radius: 3px; background: #111; box-shadow: none; }
+[data-concept="brutal"] .sw.on { background: #B6F24A; } [data-concept="brutal"] .sw.on::after { left: 24px; }
+[data-concept="brutal"] :is(.pw, .cta, .seg button, .rooms button, .pm button, .scene, .add, .home-sw) { transition: transform .08s, box-shadow .08s; color: #111; font-weight: 700; }
+[data-concept="brutal"] :is(.pw, .cta, .seg button, .rooms button, .pm button, .scene, .add, .home-sw):active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #111; }
+[data-concept="brutal"] .rooms { padding: 2px 6px 8px 2px; }
+[data-concept="brutal"] .rooms button { background: #fff; }
+[data-concept="brutal"] .rooms button.on { background: #111; color: #fff; }
+[data-concept="brutal"] .seg button { background: #fff; } [data-concept="brutal"] .seg button.on { background: #FFE45C; color: #111; }
+[data-concept="brutal"] .pw { background: #fff; } [data-concept="brutal"] .pw.on { background: #B6F24A; }
+[data-concept="brutal"] .cta { background: #FF9ED2; }
+[data-concept="brutal"] .pm button { background: #fff; font-weight: 900; }
+[data-concept="brutal"] .add { background: #fff; border-style: dashed; color: #111; }
+[data-concept="brutal"] .scene { color: #111; }
+[data-concept="brutal"] .scene span { opacity: 1; }
+[data-concept="brutal"] .scene:nth-child(1) { background: #FFE45C; transform: rotate(-1deg); } [data-concept="brutal"] .scene:nth-child(2) { background: #FF9ED2; transform: rotate(1deg); }
+[data-concept="brutal"] .scene:nth-child(3) { background: #8FD3FF; transform: rotate(1deg); } [data-concept="brutal"] .scene:nth-child(4) { background: #B6F24A; transform: rotate(-1deg); }
+[data-concept="brutal"] .scene:hover { filter: none; }
+[data-concept="brutal"] .dial { background: #FFE45C; box-shadow: 6px 6px 0 #111; color: #111; }
+[data-concept="brutal"] .dial.off { background: #fff; box-shadow: 6px 6px 0 #111; }
+[data-concept="brutal"] .dial small { color: #111; }
+[data-concept="brutal"] .badge { background: #FF4D4D; color: #fff; border: 2px solid #111; transform: rotate(12deg); border-radius: 4px; height: 20px; line-height: 16px; }
+[data-concept="brutal"] .role { background: #FFE45C; color: #111; border: 2px solid #111; transform: rotate(-3deg); font-weight: 700; }
+[data-concept="brutal"] .ift i { background: #111; color: #B6F24A; transform: rotate(-4deg); border-radius: 3px; }
+[data-concept="brutal"] .ift i.th { background: #FF9ED2; color: #111; box-shadow: inset 0 0 0 2px #111; }
+[data-concept="brutal"] .brand i { background: #FF9ED2; color: #111; border: 2.5px solid #111; box-shadow: 3px 3px 0 #111; transform: rotate(-8deg); border-radius: 6px; }
+[data-concept="brutal"] .who i { background: #8FD3FF; color: #111; border: 2px solid #111; }
+[data-concept="brutal"] .mem .av { border: 2px solid #111; }
+[data-concept="brutal"] .dn { color: #111; font-weight: 600; }
+[data-concept="brutal"] .dn.on { background: #111; color: #fff; box-shadow: none; }
+[data-concept="brutal"] .dn.on svg { color: #B6F24A; }
+[data-concept="brutal"] .home-sw { background: #FFE45C; }
+[data-concept="brutal"] .home-sw span { color: #333; }
+[data-concept="brutal"] .dsep { background: #111; height: 2.5px; }
+[data-concept="brutal"] .ech i { background: #fff; border: 2.5px solid #111; border-radius: 4px 4px 0 0; }
+[data-concept="brutal"] .ech .now i { background: repeating-linear-gradient(45deg, #FF9ED2 0 6px, #111 6px 8px); }
+[data-concept="brutal"] .ech div, [data-concept="brutal"] .ech em { color: #111; font-weight: 700; }
+[data-concept="brutal"] .bar2 { height: 14px; border: 2.5px solid #111; background: #fff; border-radius: 4px; }
+[data-concept="brutal"] .bar2 i { background: #FF9ED2; border-right: 2.5px solid #111; }
+[data-concept="brutal"] :is(.mem, .setrow) { border-top: 2px solid #111; }
+[data-concept="brutal"] .toast { background: #111; color: #B6F24A; border: 2.5px solid #111; border-radius: 6px; box-shadow: 4px 4px 0 #FF9ED2; }
+[data-concept="brutal"] .drawer .pnl { border-right: 3px solid #111; box-shadow: 6px 0 0 #111; }
+[data-concept="brutal"] .ib:hover { background: #FFE45C; }
+@media (min-width: 768px) { [data-concept="brutal"] .side { border-right: 3px solid #111; background: #fff; } }
+@media (min-width: 1024px) { [data-concept="brutal"] .bar { border-bottom: 3px solid #111; } [data-concept="brutal"] .panel { background: #fff; box-shadow: 6px 6px 0 #111; } }
+
+/* ===================== 4. 벤토 다크 미니멀 (2024) ===================== */
+html[data-concept="bento"] { --bg: #09090B; --side: #0C0C0E; --card: #111113; --card2: #19191C; --line: rgba(255,255,255,.08); --fg: #EDEDEF; --mut: #8E8E96; --c: #EDEDEF; --on-c: #09090B; --c-dim: rgba(255,255,255,.07); --cool: #B4B4BC; --good: #EDEDEF; --font: "IBM Plex Sans KR", "Apple SD Gothic Neo", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace; color-scheme: dark; }
+html[data-concept="bento"] body { background: radial-gradient(80% 50% at 50% -10%, rgba(255,255,255,.06), transparent 70%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E"), #09090B; }
+[data-concept="bento"] :is(.crd, .tile, .rule, .panel) { background: linear-gradient(180deg, #131315, #0F0F11); border: 1px solid var(--line); border-radius: 20px; box-shadow: none; }
+[data-concept="bento"] .env { background: var(--line); border: 1px solid var(--line); border-radius: 20px; }
+[data-concept="bento"] .env > div { background: #0F0F11; }
+[data-concept="bento"] .tile.on { background: linear-gradient(180deg, #19191C, #121214); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); }
+[data-concept="bento"] .tile.sel { box-shadow: inset 0 0 0 1px #EDEDEF; }
+[data-concept="bento"] .tile .ico { background: rgba(255,255,255,.04); border: 1px solid var(--line); border-radius: 10px; }
+[data-concept="bento"] .tile.on .ico { background: #EDEDEF; color: #09090B; }
+[data-concept="bento"] .tile.on .op span { color: #EDEDEF; }
+[data-concept="bento"] .sw { background: #2A2A2F; }
+[data-concept="bento"] .sw.on { background: #EDEDEF; } [data-concept="bento"] .sw.on::after { background: #09090B; }
+[data-concept="bento"] :is(.env > div, .bar .t small, .dhead .t small, .ift i, .role, .lb, .sec-h .mut, .dial small) { font-family: var(--mono); text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+[data-concept="bento"] :is(.env b, .dial b) { font-family: var(--font); text-transform: none; letter-spacing: -.02em; font-weight: 500; }
+[data-concept="bento"] .ift i { background: transparent; border: 1px solid var(--line); color: var(--mut); }
+[data-concept="bento"] .ift i.th { color: #EDEDEF; border-color: rgba(255,255,255,.25); }
+[data-concept="bento"] .rooms button { border-color: var(--line); border-radius: 10px; font-family: var(--mono); font-size: 12px; }
+[data-concept="bento"] .rooms button.on { background: #EDEDEF; color: #09090B; }
+[data-concept="bento"] :is(.seg button, .pw, .pm button) { background: #151517; border: 1px solid var(--line); border-radius: 12px; color: var(--fg); }
+[data-concept="bento"] :is(.seg button.on, .pw.on, .cta) { background: #EDEDEF; color: #09090B; border-radius: 12px; }
+[data-concept="bento"] .dial { background: radial-gradient(circle at 50% 50%, #151517, #0B0B0D 70%); border: 1px solid var(--line); box-shadow: 0 0 0 10px rgba(255,255,255,.02), 0 0 80px -10px rgba(124,156,255,.45); }
+[data-concept="bento"] .dial.off { box-shadow: 0 0 0 10px rgba(255,255,255,.02); }
+[data-concept="bento"] .scene { background: linear-gradient(180deg, #141416, #0F0F11); border: 1px solid var(--line); border-radius: 20px; }
+[data-concept="bento"] .scene:hover { filter: none; border-color: rgba(255,255,255,.2); }
+[data-concept="bento"] .add { border-color: var(--line); border-radius: 16px; font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+[data-concept="bento"] .ech i { background: rgba(255,255,255,.12); border-radius: 4px; }
+[data-concept="bento"] .ech .now i { background: #EDEDEF; box-shadow: 0 0 24px rgba(124,156,255,.5); }
+[data-concept="bento"] .bar2 { background: rgba(255,255,255,.07); height: 4px; }
+[data-concept="bento"] .bar2 i { background: #EDEDEF; }
+[data-concept="bento"] .badge { background: #EDEDEF; color: #09090B; }
+[data-concept="bento"] .brand { font-weight: 600; letter-spacing: -.03em; }
+[data-concept="bento"] .brand i { background: #EDEDEF; color: #09090B; border-radius: 8px; }
+[data-concept="bento"] .who i { background: #26262A; color: #EDEDEF; }
+[data-concept="bento"] .home-sw { background: transparent; border: 1px solid var(--line); border-radius: 14px; }
+[data-concept="bento"] .dn { font-size: 14px; }
+[data-concept="bento"] .dn.on { background: rgba(255,255,255,.07); box-shadow: none; border-radius: 10px; margin: 0 10px; width: calc(100% - 20px); }
+[data-concept="bento"] .dn.on svg { color: #EDEDEF; }
+[data-concept="bento"] .bar { background: rgba(9,9,11,.82); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+[data-concept="bento"] .bar .t { font-weight: 600; letter-spacing: -.02em; }
+[data-concept="bento"] :is(.mem, .setrow) { border-top-color: var(--line); }
+[data-concept="bento"] .dsep { background: var(--line); }
+[data-concept="bento"] .role { background: transparent; border: 1px solid var(--line); }
+[data-concept="bento"] .toast { background: #EDEDEF; color: #09090B; border-radius: 10px; font-weight: 500; }
+[data-concept="bento"] .drawer .pnl { border-right: 1px solid var(--line); }
+/* bento dashboard grid */
+.lb { color: var(--mut); }
+.bento { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bx { background: linear-gradient(180deg, #141416, #0F0F11); border: 1px solid var(--line); border-radius: 22px; padding: 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; text-align: left; color: var(--fg); font: inherit; }
+.bx > b { font-size: 30px; font-weight: 500; letter-spacing: -.03em; line-height: 1.1; }
+.bx > b small { font-size: 13px; color: var(--mut); font-weight: 400; letter-spacing: 0; }
+.b-hero, .b-scn, .b-dev { grid-column: 1 / -1; }
+.b-hero .big { font-size: 64px; }
+.spark { width: 100%; height: 48px; color: #EDEDEF; opacity: .45; margin-top: auto; display: block; }
+.bxb { cursor: pointer; } .bxb:hover { border-color: rgba(255,255,255,.22); }
+.glow { border-color: rgba(124,156,255,.35); box-shadow: 0 0 0 1px rgba(124,156,255,.12), 0 0 60px -12px rgba(124,156,255,.55); background: radial-gradient(120% 120% at 100% 0%, rgba(124,156,255,.2), transparent 60%), #111114; }
+.glow > b { color: #C3CFFF; }
+.mini { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: auto; }
+.mini button { border: 1px solid var(--line); background: rgba(255,255,255,.03); color: var(--fg); border-radius: 12px; padding: 10px 12px; cursor: pointer; font-size: 13px; text-align: left; display: flex; gap: 8px; align-items: center; }
+.mini button:hover { border-color: rgba(255,255,255,.22); }
+.b-dev { gap: 12px; }
+@media (min-width: 768px) {
+  .bento { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(132px, auto); }
+  .b-hero { grid-column: span 2; grid-row: span 2; }
+  .b-scn { grid-column: 1 / -1; }
+  .b-scn .mini { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (min-width: 1024px) {
+  .has-panel .bento { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .has-panel .b-scn { grid-column: span 1; }
+  .has-panel .b-scn .mini { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  [data-concept="bento"] .bar { border-bottom-color: var(--line); }
+  [data-concept="bento"] .panel { background: #0E0E10; }
+}
+@media (min-width: 768px) { [data-concept="bento"] .side { border-right-color: var(--line); } }
+
+/* ===================== 5. 스큐어모피즘 (2011 레트로) ===================== */
+html[data-concept="skeuo"] { --bg: #C5CCD4; --side: #33363B; --card: #FFFFFF; --card2: #F4F5F7; --line: #A8AFB8; --fg: #1E2329; --mut: #4A5361; --c: #2A77DE; --on-c: #FFFFFF; --c-dim: rgba(42,119,222,.12); --cool: #1F5FB8; --good: #237323; --font: "Helvetica Neue", Helvetica, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color-scheme: light; }
+html[data-concept="skeuo"] body { background: repeating-linear-gradient(90deg, #C5CCD4 0 5px, #CBD2DA 5px 8px); }
+[data-concept="skeuo"] .content { text-shadow: 0 1px 0 rgba(255,255,255,.55); }
+[data-concept="skeuo"] .bar { background: linear-gradient(#B4C2D3, #8195AF 50%, #7389A6 51%, #6B82A0); border-bottom: 1px solid #2D3642; box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 2px 4px rgba(0,0,0,.25); color: #fff; }
+[data-concept="skeuo"] .bar .t { text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+[data-concept="skeuo"] .bar .t small { color: #EEF2F7; }
+[data-concept="skeuo"] .bar .ib { color: #fff; background: linear-gradient(#8DA0BA, #5F7698); border: 1px solid #3B4B63; border-radius: 6px; box-shadow: inset 0 1px 0 rgba(255,255,255,.35), 0 1px 0 rgba(255,255,255,.25); padding: 5px 8px; }
+[data-concept="skeuo"] :is(.crd, .rule, .panel) { background: #fff; border: 1px solid #A8AFB8; border-radius: 10px; box-shadow: 0 1px 0 rgba(255,255,255,.8), inset 0 1px 0 #fff; }
+[data-concept="skeuo"] .tile { background: linear-gradient(#FFFFFF, #EEF0F3); border: 1px solid #A8AFB8; border-radius: 12px; box-shadow: 0 1px 0 rgba(255,255,255,.8), inset 0 1px 0 #fff; }
+[data-concept="skeuo"] .tile.on { background: linear-gradient(#FFFFFF, #E3EEFB); box-shadow: 0 1px 0 rgba(255,255,255,.8), inset 0 1px 0 #fff, 0 0 0 1px rgba(42,119,222,.35); }
+[data-concept="skeuo"] .tile.sel { box-shadow: 0 0 0 3px rgba(42,119,222,.6), inset 0 1px 0 #fff; }
+[data-concept="skeuo"] .tile .ico { background: linear-gradient(#F4F5F7, #D3D8DE); border: 1px solid #9AA2AD; border-radius: 9px; box-shadow: inset 0 1px 0 #fff; color: #5A6370; }
+[data-concept="skeuo"] .tile.on .ico { background: linear-gradient(#7DB7F7, #2C7BE0 50%, #1E6AD0 51%, #2A78DE); color: #fff; border-color: #1A56A8; }
+[data-concept="skeuo"] .tile.on .op span { color: #1D5CB8; }
+[data-concept="skeuo"] .sw { width: 66px; height: 27px; border-radius: 14px; border: 1px solid #8F98A3; background: linear-gradient(#DCDCDC, #FDFDFD); box-shadow: inset 0 2px 3px rgba(0,0,0,.25); overflow: hidden; text-shadow: none; }
+[data-concept="skeuo"] .sw::before { content: "OFF"; position: absolute; right: 9px; top: 50%; transform: translateY(-50%); font: 700 11px/1 var(--font); color: #6E6E6E; text-shadow: 0 1px 0 #fff; }
+[data-concept="skeuo"] .sw.on { background: linear-gradient(#1F68D8, #4C99F3); border-color: #1D5BB8; }
+[data-concept="skeuo"] .sw.on::before { content: "ON"; left: 11px; right: auto; color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.35); }
+[data-concept="skeuo"] .sw::after { top: 0; left: 0; width: 25px; height: 25px; background: linear-gradient(#F2F2F2, #CFCFCF); border: 1px solid #959595; box-shadow: 0 1px 2px rgba(0,0,0,.3), inset 0 1px 0 #fff; }
+[data-concept="skeuo"] .sw.on::after { left: 39px; }
+[data-concept="skeuo"] .tile .sw { right: 10px; top: 18px; }
+[data-concept="skeuo"] .env { background: #A8AFB8; border: 1px solid #A8AFB8; border-radius: 10px; box-shadow: 0 1px 0 rgba(255,255,255,.8); }
+[data-concept="skeuo"] .env > div { background: linear-gradient(#fff, #F3F4F6); }
+[data-concept="skeuo"] .rooms { gap: 0; border: 1px solid #6E7C8E; border-radius: 8px; width: max-content; max-width: 100%; box-shadow: 0 1px 0 rgba(255,255,255,.6); }
+[data-concept="skeuo"] :is(.rooms button, .seg button) { border: 0; border-right: 1px solid #8C97A6; border-radius: 0; background: linear-gradient(#FDFDFD, #DDE1E6); color: #3E4652; font-weight: 700; text-shadow: 0 1px 0 #fff; }
+[data-concept="skeuo"] :is(.rooms button, .seg button):last-child { border-right: 0; }
+[data-concept="skeuo"] :is(.rooms button.on, .seg button.on) { background: linear-gradient(#4F8FE6, #2A6FD3); color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.35); box-shadow: inset 0 1px 3px rgba(0,0,0,.35); border-color: #2A5DA8; }
+[data-concept="skeuo"] .seg { gap: 0; border: 1px solid #6E7C8E; border-radius: 8px; overflow: hidden; }
+[data-concept="skeuo"] .pw { background: linear-gradient(#FDFDFD, #E9EBEE 50%, #DCDFE4 51%, #E4E7EB); border: 1px solid #98A1AC; color: #2E3640; border-radius: 10px; box-shadow: inset 0 1px 0 #fff, 0 1px 2px rgba(0,0,0,.2); }
+[data-concept="skeuo"] :is(.pw.on, .cta) { background: linear-gradient(#7DB7F7, #3D8BEA 50%, #2A78DE 51%, #2F80E6); border: 1px solid #1A56A8; color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.35); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 2px rgba(0,0,0,.3); border-radius: 10px; }
+[data-concept="skeuo"] .pm button { background: linear-gradient(#FFFFFF, #D5DAE0); border: 1px solid #8F98A3; box-shadow: inset 0 1px 0 #fff, 0 2px 4px rgba(0,0,0,.25); color: #3E4652; font-weight: 700; }
+[data-concept="skeuo"] .pm button:active { background: linear-gradient(#D5DAE0, #FFFFFF); box-shadow: inset 0 2px 4px rgba(0,0,0,.3); }
+[data-concept="skeuo"] .dial { position: relative; margin: 26px auto; color: #2B2F35; text-shadow: 0 1px 0 rgba(255,255,255,.8); border: 1px solid #8A8A8A;
+  background: radial-gradient(circle, rgba(255,255,255,0) 60%, rgba(0,0,0,.08) 61%, rgba(0,0,0,0) 64%), conic-gradient(from 10deg, #CFCFCF, #F7F7F7 12%, #BDBDBD 25%, #F2F2F2 37%, #C6C6C6 50%, #FAFAFA 62%, #BABABA 75%, #EDEDED 87%, #CFCFCF);
+  box-shadow: 0 0 0 9px #3A3E44, 0 0 0 10px #22252A, 0 12px 26px rgba(0,0,0,.45), inset 0 2px 2px #fff, inset 0 -4px 8px rgba(0,0,0,.25); }
+[data-concept="skeuo"] .dial.off { box-shadow: 0 0 0 9px #3A3E44, 0 0 0 10px #22252A, 0 12px 26px rgba(0,0,0,.45), inset 0 2px 2px #fff, inset 0 -4px 8px rgba(0,0,0,.25); }
+[data-concept="skeuo"] .dial::before { content: ""; position: absolute; top: 12px; left: 50%; width: 6px; height: 16px; margin-left: -3px; border-radius: 3px; background: linear-gradient(#FF7A3D, #D9480F); box-shadow: 0 0 6px rgba(255,120,60,.8); }
+[data-concept="skeuo"] .dial.off::before { background: #8A8A8A; box-shadow: inset 0 1px 1px rgba(0,0,0,.4); }
+[data-concept="skeuo"] .dial small { color: #4A5059; }
+[data-concept="skeuo"] .scene { color: #fff; border: 1px solid rgba(0,0,0,.35); border-radius: 16px; text-shadow: 0 -1px 0 rgba(0,0,0,.45); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 5px rgba(0,0,0,.3); background: linear-gradient(rgba(255,255,255,.32), rgba(255,255,255,.06) 50%, rgba(0,0,0,0) 51%), var(--sk); }
+[data-concept="skeuo"] .scene:nth-child(1) { --sk: linear-gradient(#5B6B86, #34405A); } [data-concept="skeuo"] .scene:nth-child(2) { --sk: linear-gradient(#C98A2C, #94590F); }
+[data-concept="skeuo"] .scene:nth-child(3) { --sk: linear-gradient(#3F6FB8, #244985); } [data-concept="skeuo"] .scene:nth-child(4) { --sk: linear-gradient(#8A4E9A, #5B2C6B); }
+[data-concept="skeuo"] .scene span { opacity: .92; }
+[data-concept="skeuo"] .add { border: 2px dashed #8F98A3; background: rgba(255,255,255,.35); color: #4A5361; border-radius: 10px; }
+[data-concept="skeuo"] .ift i { background: linear-gradient(#7DB7F7, #2A78DE); color: #fff; text-shadow: none; border: 1px solid #1A56A8; }
+[data-concept="skeuo"] .ift i.th { background: linear-gradient(#F3B54B, #C9740C); border-color: #985709; color: #fff; }
+[data-concept="skeuo"] .ech i { background: linear-gradient(90deg, #9FB0C8, #C9D5E5 50%, #8EA0BB); border: 1px solid #6E7F98; border-radius: 4px 4px 0 0; }
+[data-concept="skeuo"] .ech .now i { background: linear-gradient(90deg, #3E8F3E, #8FD58F 50%, #3E8F3E); border-color: #2C6B2C; }
+[data-concept="skeuo"] .bar2 { height: 10px; background: linear-gradient(#C9CED4, #E5E8EB); box-shadow: inset 0 1px 2px rgba(0,0,0,.35); border-radius: 5px; }
+[data-concept="skeuo"] .bar2 i { background: linear-gradient(#7DB7F7, #2A78DE); border-radius: 5px; }
+[data-concept="skeuo"] .badge { background: radial-gradient(circle at 50% 20%, #FF8A80, #E0201B 60%); color: #fff; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.5); height: 20px; line-height: 16px; border-radius: 10px; text-shadow: 0 -1px 0 rgba(0,0,0,.3); top: -6px; right: -6px; }
+[data-concept="skeuo"] .role { background: linear-gradient(#F4F5F7, #DDE1E6); border: 1px solid #A8AFB8; color: #3E4652; }
+[data-concept="skeuo"] :is(.mem, .setrow) { border-top: 1px solid #D6DADF; box-shadow: inset 0 1px 0 #fff; }
+[data-concept="skeuo"] .toast { background: rgba(0,0,0,.75); color: #fff; border-radius: 10px; border: 2px solid rgba(255,255,255,.55); text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+[data-concept="skeuo"] :is(.side, .drawer .pnl) { background-color: #34373C; background-image: repeating-linear-gradient(45deg, rgba(255,255,255,.035) 0 1px, transparent 1px 3px), repeating-linear-gradient(-45deg, rgba(0,0,0,.14) 0 1px, transparent 1px 3px); color: #E6E8EC; border-right: 1px solid #1B1D20; }
+[data-concept="skeuo"] .dn { color: #C9CDD3; text-shadow: 0 -1px 0 rgba(0,0,0,.6); }
+[data-concept="skeuo"] .dn:hover { color: #fff; }
+[data-concept="skeuo"] .dn.on { background: linear-gradient(#5A9DF0, #2C6FD6); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 1px 0 rgba(0,0,0,.4); }
+[data-concept="skeuo"] .dn.on svg { color: #fff; }
+[data-concept="skeuo"] .home-sw { background: linear-gradient(#7A5538, #553621); border: 1px solid #2E1D10; border-radius: 10px; outline: 1.5px dashed rgba(255,226,190,.6); outline-offset: -6px; color: #FBEBD8; box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 2px 4px rgba(0,0,0,.5); text-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+[data-concept="skeuo"] .home-sw span { color: #EED6BC; }
+[data-concept="skeuo"] .brand { color: #fff; text-shadow: 0 -1px 0 rgba(0,0,0,.6); }
+[data-concept="skeuo"] .brand i { background: linear-gradient(#7DB7F7, #3D8BEA 50%, #2A78DE 51%, #2F80E6); color: #fff; border-radius: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 2px 4px rgba(0,0,0,.5); }
+[data-concept="skeuo"] .who { color: #B4B9C0; }
+[data-concept="skeuo"] .who b { color: #fff; }
+[data-concept="skeuo"] .who i { background: linear-gradient(#FFD27A, #E59A1C); color: #3A2A0A; }
+[data-concept="skeuo"] .dsep { background: #1E2023; box-shadow: 0 1px 0 rgba(255,255,255,.07); }
+@media (min-width: 1024px) { [data-concept="skeuo"] .bar { border-bottom-color: #2D3642; } [data-concept="skeuo"] .panel { background: linear-gradient(#F7F8FA, #E9ECEF); } }
+
+/* ===================== 6. 윈도우 98 (Y2K 레트로) ===================== */
+html[data-concept="win98"] { --bg: #008080; --side: #C0C0C0; --card: #C0C0C0; --card2: #C0C0C0; --line: #808080; --fg: #000000; --mut: #303030; --c: #000080; --on-c: #FFFFFF; --c-dim: #000080; --cool: #000080; --good: #006400; --font: Tahoma, Gulim, "굴림", "Malgun Gothic", sans-serif;
+  --raise: inset -1px -1px #0A0A0A, inset 1px 1px #FFFFFF, inset -2px -2px #808080, inset 2px 2px #DFDFDF; --sink: inset -1px -1px #FFFFFF, inset 1px 1px #808080, inset -2px -2px #DFDFDF, inset 2px 2px #0A0A0A; color-scheme: light; }
+html[data-concept="win98"] body { background: #008080; font-size: 13px; }
+[data-concept="win98"] :is(.app, .drawer, .w98task) *, [data-concept="win98"] .toast { border-radius: 0 !important; }
+[data-concept="win98"] .main { background: #C0C0C0; box-shadow: var(--raise); padding: 3px; }
+[data-concept="win98"] .bar { background: linear-gradient(90deg, #000080, #1084D0); color: #fff; padding: 3px 3px 3px 8px; gap: 4px; }
+[data-concept="win98"] .bar .t { font-size: 13px; font-weight: 700; }
+[data-concept="win98"] .bar .t small { display: inline; color: #DDE6F5; font-weight: 400; margin-left: 8px; font-size: 12px; }
+[data-concept="win98"] :is(.bar .ib, .dhead .ib) { color: #000; background: #C0C0C0; box-shadow: var(--raise); padding: 2px; width: 22px; height: 20px; }
+[data-concept="win98"] :is(.bar .ib, .dhead .ib) svg { width: 14px; height: 14px; }
+[data-concept="win98"] :is(.bar .ib, .dhead .ib):active { box-shadow: var(--sink); }
+[data-concept="win98"] .w98c { display: flex; gap: 2px; }
+[data-concept="win98"] .w98c i { font-style: normal; width: 20px; height: 18px; background: #C0C0C0; box-shadow: var(--raise); color: #000; display: grid; place-items: center; font: 700 11px/1 Tahoma, sans-serif; }
+[data-concept="win98"] .w98c i:last-child { margin-left: 2px; }
+[data-concept="win98"] .badge { background: #FFFFE1; color: #000; border: 1px solid #000; top: -6px; right: -8px; }
+[data-concept="win98"] .content { padding: 12px; }
+[data-concept="win98"] :is(.crd, .tile, .rule, .panel, .home-sw, .scene, .add, .pw, .cta, .seg button, .rooms button, .pm button, .env > div) { background: #C0C0C0; color: #000; border: 0; box-shadow: var(--raise); }
+[data-concept="win98"] :is(.pw, .cta, .seg button, .rooms button, .pm button, .scene, .add, .home-sw):active { box-shadow: var(--sink); }
+[data-concept="win98"] :is(.seg button.on, .rooms button.on, .pw.on) { box-shadow: var(--sink); background: repeating-conic-gradient(#C0C0C0 0 25%, #FFFFFF 0 50%) 0 0 / 2px 2px; font-weight: 700; color: #000; }
+[data-concept="win98"] .env { background: none; gap: 6px; overflow: visible; }
+[data-concept="win98"] .env > div { color: #303030; }
+[data-concept="win98"] .env b { color: #000; font-size: 20px; }
+[data-concept="win98"] .env .g { color: #006400; }
+[data-concept="win98"] .tile { gap: 8px; }
+[data-concept="win98"] .tile.on .op span { color: #000080; font-weight: 700; }
+[data-concept="win98"] .tile .op span { color: #303030; }
+[data-concept="win98"] .tile.sel { outline: 1px dotted #000; outline-offset: -6px; }
+[data-concept="win98"] .tile .ico { background: #fff; box-shadow: var(--sink); color: #000; }
+[data-concept="win98"] .tile.on .ico { background: #000080; color: #fff; }
+[data-concept="win98"] .sw { width: 18px; height: 18px; background: #fff; box-shadow: var(--sink); }
+[data-concept="win98"] .sw::after { display: none; }
+[data-concept="win98"] .sw.on { background: #fff; }
+[data-concept="win98"] .sw.on::before { content: "✔"; position: absolute; inset: 0; display: grid; place-items: center; color: #000; font: 700 12px/1 Tahoma, sans-serif; }
+[data-concept="win98"] .dial { width: 220px; height: 130px; background: #000; color: #33FF66; box-shadow: var(--sink); font-family: "Courier New", monospace; text-shadow: 0 0 6px rgba(51,255,102,.6); }
+[data-concept="win98"] .dial small { color: #2BAA4F; }
+[data-concept="win98"] .dial.off { color: #1E7A3C; text-shadow: none; }
+[data-concept="win98"] .pm button { width: 52px; height: 32px; font-size: 18px; font-weight: 700; }
+[data-concept="win98"] .seg { gap: 4px; }
+[data-concept="win98"] .rooms { gap: 4px; padding: 2px; }
+[data-concept="win98"] .rooms button { padding: 4px 12px; font-size: 12px; }
+[data-concept="win98"] .dhead { background: linear-gradient(90deg, #000080, #1084D0); color: #fff; padding: 3px 3px 3px 6px; }
+[data-concept="win98"] .dhead .t { font-size: 13px; }
+[data-concept="win98"] .dhead .t small { color: #DDE6F5; display: inline; margin-left: 6px; }
+[data-concept="win98"] .panel { padding: 3px 3px 12px; }
+[data-concept="win98"] .panel .detail > :not(.dhead):not(.dial) { margin-left: 8px; margin-right: 8px; }
+[data-concept="win98"] .panel .pw { width: auto; }
+[data-concept="win98"] .crd { padding: 12px; }
+[data-concept="win98"] .scene { min-height: 96px; gap: 4px; }
+[data-concept="win98"] .scene b { font-size: 14px; }
+[data-concept="win98"] .scene span { opacity: 1; }
+[data-concept="win98"] .scene:hover { filter: none; }
+[data-concept="win98"] .add { padding: 8px; }
+[data-concept="win98"] .ift i { background: #000080; color: #fff; letter-spacing: 0; }
+[data-concept="win98"] .ift i.th { background: #800000; color: #fff; }
+[data-concept="win98"] .rule.off { opacity: 1; color: #808080; text-shadow: 1px 1px 0 #fff; }
+[data-concept="win98"] .ech { background: #fff; box-shadow: var(--sink); padding: 18px 10px 6px; }
+[data-concept="win98"] .ech div, [data-concept="win98"] .ech em { color: #000; }
+[data-concept="win98"] .ech i { background: #000080; }
+[data-concept="win98"] .ech .now i { background: repeating-linear-gradient(45deg, #000080 0 2px, #C0C0C0 2px 4px); }
+[data-concept="win98"] .bar2 { height: 18px; background: #fff; box-shadow: var(--sink); padding: 3px; }
+[data-concept="win98"] .bar2 i { background: repeating-linear-gradient(90deg, #000080 0 8px, transparent 8px 10px); }
+[data-concept="win98"] :is(.mem, .setrow) { border-top: 1px solid #808080; box-shadow: inset 0 1px 0 #fff; }
+[data-concept="win98"] .role { background: #fff; box-shadow: var(--sink); color: #000; }
+[data-concept="win98"] .cta { font-weight: 700; outline: 1px dotted #000; outline-offset: -5px; }
+[data-concept="win98"] .toast { background: #FFFFE1; color: #000; border: 1px solid #000; box-shadow: 2px 2px 0 rgba(0,0,0,.4); font-weight: 400; font-size: 13px; }
+[data-concept="win98"] .burger { display: none; }
+[data-concept="win98"] .dn { color: #000; padding: 8px 14px; font-size: 13px; }
+[data-concept="win98"] :is(.dn:hover, .dn.on) { background: #000080; color: #fff; box-shadow: none; }
+[data-concept="win98"] :is(.dn:hover, .dn.on) svg { color: #fff; }
+[data-concept="win98"] .dsep { background: #808080; box-shadow: 0 1px 0 #fff; height: 1px; margin: 6px 8px; }
+[data-concept="win98"] .brand { font-size: 15px; padding-bottom: 12px; }
+[data-concept="win98"] .brand i { background: #000080; color: #fff; width: 24px; height: 24px; }
+[data-concept="win98"] .home-sw { margin: 0 10px 12px; width: calc(100% - 20px); padding: 8px; }
+[data-concept="win98"] .home-sw b { font-size: 13px; }
+[data-concept="win98"] .home-sw span, [data-concept="win98"] .who { color: #303030; }
+[data-concept="win98"] .who b { color: #000; }
+[data-concept="win98"] .who i { background: #008080; color: #fff; }
+[data-concept="win98"] .drawer { inset: 0 0 40px 0; align-items: flex-end; }
+[data-concept="win98"] .drawer .pnl { background: #C0C0C0; box-shadow: var(--raise); height: auto; max-height: 100%; padding: 12px 0; animation: none; }
+[data-concept="win98"] .drawer .shade { background: transparent; }
+[data-concept="win98"] .w98task { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; display: flex; gap: 4px; align-items: center; background: #C0C0C0; box-shadow: inset 0 1px #DFDFDF, inset 0 2px #fff; padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 4px); font: 13px Tahoma, Gulim, sans-serif; color: #000; }
+[data-concept="win98"] .w98start { display: flex; gap: 4px; align-items: center; font-weight: 700; background: #C0C0C0; border: 0; box-shadow: var(--raise); padding: 4px 8px; cursor: pointer; }
+[data-concept="win98"] .w98start[aria-pressed="true"] { box-shadow: var(--sink); }
+[data-concept="win98"] .w98tb { flex: 1; min-width: 0; box-shadow: var(--sink); padding: 4px 8px; background: repeating-conic-gradient(#C0C0C0 0 25%, #FFFFFF 0 50%) 0 0 / 2px 2px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-concept="win98"] .w98clk { box-shadow: inset -1px -1px #fff, inset 1px 1px #808080; padding: 4px 8px; }
+@media (max-width: 767px) {
+  [data-concept="win98"] .app { padding-bottom: 40px; }
+  [data-concept="win98"] .toast { bottom: calc(env(safe-area-inset-bottom, 0px) + 52px); }
+}
+@media (min-width: 768px) {
+  [data-concept="win98"] .main { margin: 10px; }
+  [data-concept="win98"] .bar { padding: 3px 3px 3px 8px; border-bottom: 0; }
+  [data-concept="win98"] .side { background: #C0C0C0; box-shadow: var(--raise); border: 0; margin: 10px 0 10px 10px; height: calc(100vh - 20px); top: 10px; }
+  [data-concept="win98"] .side .dn { padding: 10px 0; }
+}
+@media (min-width: 1024px) {
+  [data-concept="win98"] .side { padding-left: 30px; }
+  [data-concept="win98"] .side::before { content: "하우스 98"; position: absolute; left: 3px; top: 3px; bottom: 3px; width: 26px; background: linear-gradient(0deg, #000080, #1084D0); color: #C0C0C0; writing-mode: vertical-rl; transform: rotate(180deg); font: 700 20px/26px Tahoma, Gulim, sans-serif; padding: 12px 0; letter-spacing: 1px; }
+  [data-concept="win98"] .side .dn { padding: 8px 14px; }
+  [data-concept="win98"] .content { padding: 16px 18px 24px; }
+  [data-concept="win98"] .panel { top: 40px; }
+}
+</style>
+
+<div id="root"></div>
+
+<script>
+const I = {
+  home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z', bell: 'M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4', menu: 'M4 6h16M4 12h16M4 18h16',
+  back: 'M15 5l-7 7 7 7', x: 'M6 6l12 12M18 6L6 18', more: 'M5 12h.01M12 12h.01M19 12h.01', chat: 'M4 5h16v11H9l-5 4z',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.6.6 1 1.4 1 2.5h6c0-1.1.4-1.9 1-2.5A6 6 0 0 0 12 3z', snow: 'M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9',
+  wind: 'M3 9h11a3 3 0 1 0-3-3M3 15h15a3 3 0 1 1-3 3', drop: 'M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z', robot: 'M5 8h14v11H5zM12 4v4M9 13h.01M15 13h.01M2 12v3M22 12v3',
+  lock: 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3', scene: 'M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z', flow: 'M5 6h6v4H5zM13 14h6v4h-6zM8 10v4h8',
+  zap: 'M13 3L5 14h6l-1 7 8-11h-6z', users: 'M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21c1-4 3.5-6 7-6s6 2 7 6M16 3.5a4 4 0 0 1 0 7M18 15c2 .6 3.4 2.6 4 6',
+  gear: 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1'
+};
+const ic = (n, sz = 22, sw = 1.8) => `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${I[n]}"/></svg>`;
+const sw = (on, a, v = '', label = '켜기/끄기') => `<button class="sw ${on ? 'on' : ''}" data-a="${a}" data-v="${v}" aria-pressed="${on}" aria-label="${label}"></button>`;
+const mqDesk = matchMedia('(min-width: 1024px)');
+
+const S = { page: 'dash', drawer: false, room: '전체', det: null, toast: null,
+  dev: [
+    { id: 1, n: '거실 조명', room: '거실', k: 'light', on: true, v: 70 }, { id: 2, n: '에어컨', room: '거실', k: 'ac', on: true, v: 24, m: '냉방' },
+    { id: 3, n: '공기청정기', room: '거실', k: 'air', on: true, v: '자동' }, { id: 4, n: '정수기', room: '주방', k: 'water', on: true, v: '온수 잠금' },
+    { id: 5, n: '로봇청소기', room: '거실', k: 'robot', on: false, v: '충전 중 92%' }, { id: 6, n: '침실 조명', room: '침실', k: 'light', on: false, v: 40 },
+    { id: 7, n: '가습기', room: '침실', k: 'hum', on: false, v: 55 }, { id: 8, n: '도어락', room: '현관', k: 'lock', on: true, v: '' }],
+  autos: [{ on: true, i: '미세먼지(PM2.5) 36㎍/㎥ 이상', t: '공기청정기 터보 운전' }, { on: true, i: '평일 오전 7:00', t: '거실 조명 80% · 정수기 온수 잠금 해제' },
+    { on: false, i: '모든 구성원이 외출하면', t: '외출 장면 실행' }, { on: true, i: '실내 습도 35% 미만', t: '가습기 켜기 (목표 50%)' }],
+  set: { alert: true, autoN: false, dnd: true, geo: true }, saver: true, dz: false };
+const DIC = { light: 'bulb', ac: 'snow', air: 'wind', water: 'drop', robot: 'robot', hum: 'drop', lock: 'lock' };
+const dStat = d => d.k === 'lock' ? (d.on ? '잠김' : '열림') : !d.on ? '꺼짐' : ({ light: `밝기 ${d.v}%`, ac: `${d.v}°C · ${d.m}`, hum: `목표 습도 ${d.v}%`, air: `${d.v} 모드` })[d.k] || d.v;
+const STEP = { light: [10, 10, 100, '%', '밝기'], ac: [1, 18, 30, '°C', '희망 온도'], hum: [5, 30, 70, '%', '목표 습도'] };
+const SCN = [
+  { n: '외출', d: '조명·에어컨 끄기, 도어락 잠금, 청소 시작', c: '#2E3550', f: D => D.forEach(d => { if (['light', 'ac', 'hum'].includes(d.k)) d.on = false; if (d.k === 'lock') d.on = true; if (d.k === 'robot') { d.on = true; d.v = '청소 중'; } }) },
+  { n: '귀가', d: '거실 조명 80%, 에어컨 24°C, 청소 멈춤', c: '#4A3A22', f: D => D.forEach(d => { if (d.id === 1) { d.on = true; d.v = 80; } if (d.k === 'ac') { d.on = true; d.v = 24; } if (d.k === 'robot') { d.on = false; d.v = '충전 중 64%'; } }) },
+  { n: '취침', d: '조명 끄기, 공기청정기 수면, 가습기 켜기', c: '#23324A', f: D => D.forEach(d => { if (d.k === 'light') d.on = false; if (d.k === 'air') { d.on = true; d.v = '수면'; } if (d.k === 'hum') d.on = true; if (d.k === 'lock') d.on = true; }) },
+  { n: '영화', d: '거실 조명 20%, 에어컨 25°C', c: '#3D2A3E', f: D => D.forEach(d => { if (d.id === 1) { d.on = true; d.v = 20; } if (d.k === 'ac') { d.on = true; d.v = 25; } }) }];
+const PAGES = [['dash', '홈', 'home'], ['scene', '장면', 'scene'], ['auto', '자동화', 'flow'], ['energy', '에너지', 'zap'], ['members', '구성원', 'users'], ['settings', '설정', 'gear']];
+const ROOMS = ['전체', '거실', '침실', '주방', '현관'];
+
+let toastT;
+function toast(msg) { S.toast = msg; clearTimeout(toastT); toastT = setTimeout(() => { S.toast = null; render(); }, 2400); }
+
+/* ---------- 내비 (사이드바/드로어 공용) ---------- */
+function navHtml() {
+  const item = ([k, l, i]) => `<button class="dn ${S.page === k ? 'on' : ''}" data-a="page" data-v="${k}" title="${l}" aria-current="${S.page === k ? 'page' : 'false'}">${ic(i, 20)}<span>${l}</span></button>`;
+  return `<div class="brand"><i>${ic('home', 18, 2.2)}</i><span>하우스</span></div>
+    <button class="home-sw" data-a="noop"><b>우리집 ▾</b><span>기기 8대 · 구성원 4명</span></button>
+    <nav aria-label="주 메뉴">${PAGES.slice(0, 5).map(item).join('')}<div class="dsep"></div>${item(PAGES[5])}
+    <button class="dn" data-a="noop" title="고객지원">${ic('chat', 20)}<span>고객지원</span></button></nav>
+    <div class="who"><i>엄</i><div><b>엄마 · 관리자</b><span>mom@example.com</span></div></div>`;
+}
+
+/* ---------- 페이지 본문 ---------- */
+function roomsHtml() {
+  return `<div class="rooms" role="tablist">${ROOMS.map(r => `<button class="${S.room === r ? 'on' : ''}" data-a="room" data-v="${r}" role="tab" aria-selected="${S.room === r}">${r}</button>`).join('')}</div>`;
+}
+function tilesHtml(list, desk) {
+  return `<div class="tiles">${list.map(d => `<div class="tile ${d.on ? 'on' : ''} ${desk && S.det === d.id ? 'sel' : ''}"><span class="ico">${ic(DIC[d.k], 18)}</span>${sw(d.on, 'tog', d.id, d.n + ' 전원')}
+      <button class="op" data-a="det" data-v="${d.id}"><b>${d.n}</b><span>${dStat(d)}</span></button></div>`).join('')}</div>`;
+}
+function dashHtml(desk) {
+  const list = S.dev.filter(d => S.room === '전체' || d.room === S.room);
+  const onN = S.dev.filter(d => d.on && d.k !== 'lock').length;
+  if (concept === 'bento') {
+    const lock = S.dev.find(d => d.k === 'lock');
+    return `<div class="bento">
+      <div class="bx b-hero"><span class="lb">Indoor · 실내 온도</span><b class="big num">23.5<small>°C</small></b><span class="mut">바깥 18°C 맑음 · 어제 이 시간보다 0.4° 높아요</span>
+        <svg class="spark" viewBox="0 0 200 48" preserveAspectRatio="none" aria-hidden="true"><path d="M0 36 L25 31 L50 33 L75 25 L100 27 L125 19 L150 21 L175 14 L200 16" fill="none" style="stroke:currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/></svg></div>
+      <div class="bx"><span class="lb">Humidity · 습도</span><b class="num">46%</b><span class="mut">적정 40–60%</span></div>
+      <div class="bx glow"><span class="lb">PM2.5 · 미세먼지</span><b class="num">12</b><span class="mut">좋음 · ㎍/㎥</span></div>
+      <div class="bx"><span class="lb">Active · 작동 중</span><b class="num">${onN}<small> / 8대</small></b><span class="mut">도어락 ${lock.on ? '잠김' : '열림'}</span></div>
+      <button class="bx bxb" data-a="page" data-v="energy"><span class="lb">Energy · 10월</span><b class="num">312<small> kWh</small></b><span class="mut">약 48,200원 · 자세히 →</span></button>
+      <div class="bx b-scn"><span class="lb">Scenes · 장면</span><div class="mini">${SCN.map((c, i) => `<button data-a="scene" data-v="${i}">${ic('scene', 16)}<span>${c.n}</span></button>`).join('')}</div></div>
+      <div class="bx b-dev"><div class="sec-h"><span class="lb">Devices · 기기 ${list.length}대</span></div>${roomsHtml()}${tilesHtml(list, desk)}<button class="add" data-a="noop">+ 기기 추가</button></div>
+    </div>`;
+  }
+  return `<div class="env"><div>실내 온도<b class="num">23.5°</b></div><div>습도<b class="num">46%</b></div><div>PM2.5<b class="num g">12</b></div><div class="x">작동 중<b class="num">${onN}대</b></div></div>
+    <div class="mut">바깥 18°C 맑음 · 미세먼지 보통 · 작동 중인 기기 ${onN}대</div>
+    <div class="sec-h"><h2>기기</h2><span class="mut">${list.length}대</span></div>
+    ${roomsHtml()}${tilesHtml(list, desk)}
+    <button class="add" data-a="noop">+ 기기 추가</button>`;
+}
+function pageHtml(desk) {
+  switch (S.page) {
+    case 'dash': return dashHtml(desk);
+    case 'scene': return `<div class="mut">장면을 누르면 여러 기기가 한 번에 바뀌어요.</div>
+      <div class="scenes">${SCN.map((c, i) => `<button class="scene" style="--sc:${c.c}" data-a="scene" data-v="${i}">${ic('scene', 22)}<b>${c.n}</b><span>${c.d}</span></button>`).join('')}</div>
+      <button class="add" data-a="noop">+ 새 장면 만들기</button>`;
+    case 'auto': return `<div class="mut">조건이 맞으면 자동으로 실행돼요. ${S.autos.filter(a => a.on).length}개 켜짐</div>
+      <div class="rules">${S.autos.map((a, i) => `<div class="rule ${a.on ? '' : 'off'}"><div class="ift"><span><i>IF</i>${a.i}</span><span><i class="th">THEN</i>${a.t}</span></div>${sw(a.on, 'auto', i, '자동화 켜기/끄기')}</div>`).join('')}</div>
+      <button class="add" data-a="addauto">+ 자동화 추가</button>`;
+    case 'energy': {
+      const M = [['5월', 268], ['6월', 301], ['7월', 388], ['8월', 412], ['9월', 334], ['10월', 312]];
+      return `<div class="egrid"><div class="crd"><div class="mut">10월 예상 사용량</div><div class="row" style="align-items:baseline;flex-wrap:wrap"><b class="num" style="font-size:32px">312<small style="font-size:14px"> kWh</small></b><span class="num" style="color:var(--c);font-weight:700">약 48,200원</span></div>
+        <div class="mut">누진 2단계 구간(201~400kWh) 적용 예상 · 지난달보다 7% 적어요</div>
+        <div class="ech" role="img" aria-label="월별 사용량 막대 그래프">${M.map(([m, v], i) => `<div class="${i === 5 ? 'now' : ''}"><em class="num">${v}</em><i style="height:${v / 412 * 100}%"></i>${m}</div>`).join('')}</div></div>
+        <div class="crd brk"><b>기기별 사용 비중</b>${[['에어컨', 38], ['정수기', 14], ['공기청정기', 12], ['조명', 9], ['기타', 27]].map(([n, p]) => `<div><div class="row" style="font-size:13px"><span>${n}</span><span class="num">${p}%</span></div><div class="bar2"><i style="width:${p}%"></i></div></div>`).join('')}
+        <div class="mut" style="margin-top:4px">에어컨 희망 온도를 1°C 올리면 한 달 약 6% 줄일 수 있어요.</div></div></div>`;
+    }
+    case 'members': return `<div class="two"><div class="crd">${[['엄마', '관리자', '#F2B544'], ['아빠', '구성원', '#6FA8FF'], ['하윤', '구성원 · 도어락 제외', '#8FD3B0'], ['홈 도우미', '게스트 · 10.31까지', '#C9A5F0']].map(([n, r, c]) => `<div class="mem"><div class="av" style="background:${c}">${n[0]}</div><div><b>${n}</b><div class="mut">${n === '엄마' ? '나' : '최근 접속 ' + (n === '홈 도우미' ? '3일 전' : '오늘')}</div></div><span class="role">${r}</span></div>`).join('')}</div>
+      <div class="crd" style="display:flex;flex-direction:column;gap:12px"><b>구성원 초대</b><div class="mut">게스트는 기간과 사용할 수 있는 기기를 정해서 초대할 수 있어요.</div><button class="cta" data-a="invite">구성원 초대하기</button></div></div>`;
+    default: {
+      const L = [['alert', '기기 이상 알림', '필터 교체, 연결 끊김 등'], ['autoN', '자동화 실행 알림', '자동화가 실행될 때마다 알려줘요'], ['dnd', '방해 금지', '23:00 – 07:00'], ['geo', '위치 기반 귀가 감지', '집 반경 300m 진입 시']];
+      return `<div class="two"><div class="crd">${L.map(([k, t, d]) => `<div class="setrow"><div><b style="font-size:14px">${t}</b><div class="mut">${d}</div></div>${sw(S.set[k], 'set', k, t)}</div>`).join('')}</div>
+        <div class="crd"><div class="row"><span>앱 버전</span><span class="mut">3.4.0</span></div></div></div>`;
+    }
+  }
+}
+function detailHtml(desk) {
+  const d = S.dev.find(x => x.id === S.det), st = STEP[d.k];
+  let ctl = '';
+  if (st) ctl = `<div class="dial ${d.on ? '' : 'off'}"><div><small>${st[4]}</small><b class="num">${d.v}<small style="display:inline;font-size:18px">${st[3]}</small></b><small>${d.on ? dStat(d) : '꺼져 있어요'}</small></div></div>
+    <div class="pm"><button data-a="step" data-v="-1" aria-label="낮추기">−</button><button data-a="step" data-v="1" aria-label="높이기">+</button></div>`;
+  if (d.k === 'ac') ctl += `<div class="seg">${['냉방', '제습', '송풍'].map(m => `<button class="${d.m === m ? 'on' : ''}" data-a="acm" data-v="${m}">${m}</button>`).join('')}</div>`;
+  if (d.k === 'air') ctl = `<div class="dial ${d.on ? '' : 'off'}"><div><small>PM2.5</small><b class="num">12</b><small>좋음 · ${d.v} 모드</small></div></div><div class="seg">${['자동', '수면', '터보'].map(m => `<button class="${d.v === m ? 'on' : ''}" data-a="airm" data-v="${m}">${m}</button>`).join('')}</div>
+    <div class="crd"><div class="row"><span>필터 수명</span><span class="num" style="color:var(--c)">12% · 약 14일</span></div></div>`;
+  if (d.k === 'water') ctl = `<div class="crd">${[['온수 잠금', d.v === '온수 잠금', 'hotlock'], ['절전 모드', S.saver, 'saver']].map(([n, on, a]) => `<div class="setrow"><span>${n}</span>${sw(on, a, '', n)}</div>`).join('')}<div class="setrow"><span>오늘 출수량</span><span class="num">1.8L</span></div><div class="setrow"><span>다음 방문 점검</span><span>11월 3일</span></div></div>`;
+  if (d.k === 'robot') ctl = `<div class="dial ${d.on ? '' : 'off'}"><div><small>상태</small><b style="font-size:22px">${d.on ? '청소 중' : '대기'}</b><small>${d.on ? '거실 12㎡ 완료' : d.v}</small></div></div>`;
+  if (d.k === 'lock') ctl = `<div class="dial ${d.on ? '' : 'off'}"><div>${ic('lock', 40)}<b style="font-size:22px;display:block">${d.on ? '잠김' : '열림'}</b><small>최근 출입 14:02 하윤</small></div></div>`;
+  const pwLabel = d.k === 'lock' ? (d.on ? '잠금 해제' : '잠그기') : d.k === 'robot' ? (d.on ? '청소 멈추고 충전' : '청소 시작') : (d.on ? '전원 끄기' : '전원 켜기');
+  return `<div class="detail ${desk ? '' : 'detail-page'}"><div class="dhead"><button class="ib" data-a="close" aria-label="${desk ? '패널 닫기' : '뒤로'}">${ic(desk ? 'x' : 'back')}</button><div class="t">${d.n}<small>${d.room} · 온라인</small></div>${desk ? '' : dzBtn('dz-inline')}<button class="ib" data-a="noop" aria-label="더보기">${ic('more')}</button></div>
+    ${ctl}<button class="pw ${d.on ? 'on' : ''}" data-a="tog" data-v="${d.id}">${pwLabel}</button>
+    <div class="crd"><b style="font-size:14px">최근 기록</b><div class="mut" style="margin-top:6px;line-height:1.8">14:02 앱에서 변경 (엄마)<br>07:00 자동화 실행<br>어제 23:10 취침 장면</div></div></div>`;
+}
+
+/* ---------- 디자인 컨셉 ---------- */
+const CONCEPTS = [
+  ['base', '기본', '현재 디자인', '어두운 대시보드에 켜진 기기만 앰버색으로 빛나요'],
+  ['glass', '리퀴드 글래스', '2025 트렌드', '오로라 배경 위 반투명 유리 패널과 떠 있는 캡슐 내비'],
+  ['brutal', '네오 브루탈리즘', '2023 트렌드', '두꺼운 검은 테두리, 각진 그림자, 원색 블록'],
+  ['bento', '벤토 다크 미니멀', '2024 트렌드', '모노톤 타일 그리드와 모노스페이스 라벨'],
+  ['skeuo', '스큐어모피즘', '2011 레트로', '린넨 질감, 광택 버튼, 금속 다이얼과 ON/OFF 스위치'],
+  ['win98', '윈도우 98', 'Y2K 레트로', '청록 바탕화면, 회색 입체 창과 시작 메뉴']];
+let concept = 'base';
+try { const saved = localStorage.getItem('design-concept'); if (CONCEPTS.some(c => c[0] === saved)) concept = saved; } catch (e) {}
+document.documentElement.dataset.concept = concept;
+function setConcept(id) {
+  if (!CONCEPTS.some(c => c[0] === id)) return;
+  concept = id; document.documentElement.dataset.concept = id;
+  try { localStorage.setItem('design-concept', id); } catch (e) {}
+  S.dz = false; render();
+}
+window.setConcept = setConcept;
+const dzBtn = cls => `<button class="dz dzbtn ${cls}" data-a="dz" aria-expanded="${!!S.dz}" aria-haspopup="true">${ic('scene', 14, 2)}디자인</button>`;
+const dzPanel = () => `<div class="dz dzp" role="dialog" aria-label="디자인 컨셉 선택"><div class="dzh">디자인 컨셉 <span>${CONCEPTS.length}종</span></div>
+  ${CONCEPTS.map(([id, n, era, d]) => `<button class="dzi ${concept === id ? 'on' : ''}" data-a="concept" data-v="${id}" aria-pressed="${concept === id}"><span class="dzt"><b>${n}</b><em>${era}</em>${concept === id ? '<i>사용 중</i>' : ''}</span><span class="dzd">${d}</span></button>`).join('')}</div>`;
+
+/* ---------- 렌더 ---------- */
+function render() {
+  const desk = mqDesk.matches;
+  const title = S.page === 'dash' ? '우리집' : PAGES.find(p => p[0] === S.page)[1];
+  const sub = { dash: '10월 7일 수요일 · 기기 8대', scene: '한 번에 여러 기기 바꾸기', auto: '조건에 따라 자동 실행', energy: '2026년 10월', members: '4명', settings: '알림과 앱 설정' }[S.page];
+  const panelOpen = desk && S.det && S.page === 'dash';
+  const fullDetail = !desk && S.det;
+  const main = fullDetail ? `<div class="content">${detailHtml(false)}</div>`
+    : `<header class="bar"><button class="ib burger" data-a="drawer" aria-label="메뉴 열기">${ic('menu')}</button><div class="t">${title}<small>${sub}</small></div>${dzBtn('dz-inline')}<button class="ib" data-a="noop" aria-label="알림 2개">${ic('bell')}<span class="badge">2</span></button>${concept === 'win98' ? '<span class="w98c" aria-hidden="true"><i>─</i><i>□</i><i>×</i></span>' : ''}</header>
+      <div class="content"><div class="work ${panelOpen ? 'has-panel' : ''}"><div style="display:flex;flex-direction:column;gap:16px;min-width:0">${pageHtml(desk)}</div>${panelOpen ? `<aside class="panel" aria-label="기기 상세">${detailHtml(true)}</aside>` : ''}</div></div>`;
+  const drawer = S.drawer && !matchMedia('(min-width: 768px)').matches ? `<div class="drawer"><div class="pnl" role="dialog" aria-label="메뉴">${navHtml()}</div><button class="shade" data-a="drawer" aria-label="메뉴 닫기"></button></div>` : '';
+  const fx = document.activeElement && document.activeElement.dataset ? [document.activeElement.dataset.a, document.activeElement.dataset.v] : null;
+  const task = concept === 'win98' && !matchMedia('(min-width: 768px)').matches ? `<div class="w98task"><button class="w98start" data-a="drawer" aria-pressed="${S.drawer}">${ic('home', 14, 2.4)}시작</button><span class="w98tb">${fullDetail ? S.dev.find(x => x.id === S.det).n : title}</span><span class="w98clk">오후 2:14</span></div>` : '';
+  document.getElementById('root').innerHTML = `<div class="app"><aside class="side">${navHtml()}</aside><main class="main">${main}</main></div>${drawer}${task}${dzBtn('dz-float')}${S.dz ? dzPanel() : ''}${S.toast ? `<div class="toast" role="status">${S.toast}</div>` : ''}`;
+  if (fx && fx[0]) { const el = document.querySelector(`.main [data-a="${fx[0]}"]${fx[1] !== undefined ? `[data-v="${fx[1]}"]` : ''}`); if (el) el.focus({ preventScroll: true }); }
+}
+
+/* ---------- 액션 ---------- */
+const ACT = {
+  drawer: () => S.drawer = !S.drawer,
+  page: v => { S.page = v; S.drawer = false; S.det = null; window.scrollTo(0, 0); },
+  room: v => S.room = v,
+  tog: v => { const d = S.dev.find(x => x.id === +v); d.on = !d.on; if (d.k === 'robot') d.v = d.on ? '청소 중' : '충전 중 92%'; },
+  det: v => { S.det = S.det === +v && mqDesk.matches ? null : +v; if (!mqDesk.matches) window.scrollTo(0, 0); },
+  close: () => S.det = null,
+  step: v => { const d = S.dev.find(x => x.id === S.det), st = STEP[d.k]; d.v = Math.max(st[1], Math.min(st[2], d.v + st[0] * v)); d.on = true; },
+  acm: v => { const d = S.dev.find(x => x.id === S.det); d.m = v; d.on = true; },
+  airm: v => { const d = S.dev.find(x => x.id === S.det); d.v = v; d.on = true; },
+  hotlock: () => { const d = S.dev.find(x => x.id === S.det); d.v = d.v === '온수 잠금' ? '온수 사용 가능' : '온수 잠금'; },
+  saver: () => S.saver = !S.saver,
+  scene: v => { const b = JSON.stringify(S.dev.map(d => [d.on, d.v])); SCN[+v].f(S.dev); const a = S.dev.map(d => [d.on, d.v]), bb = JSON.parse(b);
+    const n = a.filter((x, i) => JSON.stringify(x) !== JSON.stringify(bb[i])).length; toast(`${SCN[+v].n} 장면 실행 · 기기 ${n}대 변경`); },
+  auto: v => S.autos[+v].on = !S.autos[+v].on,
+  addauto: () => { S.autos.push({ on: true, i: '일몰 시간이 되면', t: '거실 조명 60%로 켜기' }); toast('자동화를 추가했어요'); },
+  set: v => S.set[v] = !S.set[v],
+  invite: () => toast('초대 링크를 만들었어요 (예시)'),
+  noop: () => toast('예시 화면이라 이동하지 않아요'),
+  dz: () => S.dz = !S.dz,
+  concept: v => setConcept(v)
+};
+document.addEventListener('click', e => {
+  if (S.dz && !e.target.closest('.dz')) { S.dz = false; if (!e.target.closest('[data-a]')) { render(); return; } }
+  const b = e.target.closest('[data-a]');
+  if (!b || b.disabled) return;
+  const fn = ACT[b.dataset.a]; if (!fn) return;
+  fn(b.dataset.v); render();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && (S.dz || S.drawer || S.det)) { if (S.dz) S.dz = false; else if (S.drawer) S.drawer = false; else S.det = null; render(); } });
+mqDesk.addEventListener('change', render);
+matchMedia('(min-width: 768px)').addEventListener('change', () => { S.drawer = false; render(); });
+render();
+</script>
+
+</body>
+</html>
